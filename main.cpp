@@ -1,30 +1,41 @@
 #include "glad/glad.h"
 #include <GLFW/glfw3.h>
 #include <iostream>
+#include <cmath> // Include cmath for M_PI
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
-void processInput(GLFWwindow *window);
+void processInput(GLFWwindow* window);
 
 // settings
 const unsigned int SCR_WIDTH = 800;
 const unsigned int SCR_HEIGHT = 600;
 
-float offsetX = 0.0f;
+float offsetX = 0.0f; // Horizontal offset for translation
+float angle = 0.0f;   // Rotation angle
 
 // Vertex shader program
-const char *vertexShaderSource = "#version 330 core\n"
+const char* vertexShaderSource = "#version 330 core\n"
     "layout (location = 0) in vec3 aPos;\n"
     "layout (location = 1) in vec3 aColor;\n"
     "out vec3 ourColor;\n"
     "uniform float xOffset;\n"
+    "uniform float rotation;\n"
     "void main()\n"
     "{\n"
-    "   gl_Position = vec4(aPos.x + xOffset, aPos.y, aPos.z, 1.0);\n"
+    "   float cosTheta = cos(rotation);\n"
+    "   float sinTheta = sin(rotation);\n"
+    "   mat4 rotationMatrix = mat4(\n"
+    "       cosTheta, -sinTheta, 0.0, 0.0,\n"
+    "       sinTheta,  cosTheta, 0.0, 0.0,\n"
+    "       0.0,       0.0,      1.0, 0.0,\n"
+    "       0.0,       0.0,      0.0, 1.0\n"
+    "   );\n"
+    "   gl_Position = rotationMatrix * vec4(aPos.x + xOffset, aPos.y, aPos.z, 1.0);\n"
     "   ourColor = aColor;\n"
     "}\0";
 
 // Fragment shader program
-const char *fragmentShaderSource = "#version 330 core\n"
+const char* fragmentShaderSource = "#version 330 core\n"
     "in vec3 ourColor;\n"
     "out vec4 FragColor;\n"
     "void main()\n"
@@ -129,14 +140,25 @@ int main() {
     while (!glfwWindowShouldClose(window)) {
         processInput(window);
 
+        // Increase angle for rotation
+        angle += 0.01f;  // Increase the angle for continuous rotation
+        if (angle > 2 * M_PI) {
+            angle -= 2 * M_PI;  // Keep the angle in range
+        }
+
         // Render
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw the rectangle
         glUseProgram(shaderProgram);
+        
+        // Set uniforms
         int vertexOffsetLocation = glGetUniformLocation(shaderProgram, "xOffset");
         glUniform1f(vertexOffsetLocation, offsetX);
+        
+        int rotationLocation = glGetUniformLocation(shaderProgram, "rotation");
+        glUniform1f(rotationLocation, angle);  // Set the uniform for rotation
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
@@ -155,7 +177,7 @@ int main() {
     return 0;
 }
 
-void processInput(GLFWwindow *window) {
+void processInput(GLFWwindow* window) {
     if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
         glfwSetWindowShouldClose(window, true);
     if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
