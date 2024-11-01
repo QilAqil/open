@@ -1,4 +1,4 @@
-#include <GL/glut.h>
+#include <GL/glut.h> // g
 
 int x = 200;
 bool kanan = true;
@@ -8,29 +8,35 @@ void init() {
     gluOrtho2D(0.0, 800.0, 0.0, 600.0);
 }
 
-void timer(int nilai) {
+/*void idle() {
+glutPostRedisplay();
+}*/
+
+void timer(int nilai) { // value
     glutPostRedisplay();
     glutTimerFunc(10, timer, 0);
 }
 
-void display() { // Renamed from 'd' to 'display' for clarity
+void display() { // d
     glClear(GL_COLOR_BUFFER_BIT);
     
     if (kanan) {
         x++;
+        //glTranslatef(1.0, 0.0, 0.0); tidak di pakai
         if (x > 600) {
             kanan = false;
         }
     } else {
         x--;
+        // glTranslatef(-1.0, 0.0, 0.0);
         if (x < 0) {
-            kanan = true; // Corrected from 'benar' to 'true'
+            kanan = true;
         }
     }
 
     glColor3f(1.0, 0.0, 0.0);
     glBegin(GL_QUADS);
-        glVertex2f(x, 200.0);      // Use 'x' for horizontal movement
+        glVertex2f(x, 200.0);      // x horisontal
         glVertex2f(x, 400.0);
         glVertex2f(x + 200.0, 400.0);
         glVertex2f(x + 200.0, 200.0);
@@ -39,7 +45,7 @@ void display() { // Renamed from 'd' to 'display' for clarity
     glutSwapBuffers();
 }
 
-int main(int argc, char** argv) { // Corrected 'batal' to 'int'
+int main(int argc, char** argv) { // void ganti int
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
     glutInitWindowSize(800, 600);
@@ -47,9 +53,9 @@ int main(int argc, char** argv) { // Corrected 'batal' to 'int'
     glutCreateWindow("Percobaan Pertama Saya");
     
     init();
-    glutDisplayFunc(display);
-    // glutIdleFunc(idle); // Uncomment if you want to use idle
+    glutDisplayFunc(display); //d ganti display
+    // glutIdleFunc(idle); 
     glutTimerFunc(0, timer, 0);
     glutMainLoop();
-    return 0; // Added return statement
+    return 0; // tambah return statement
 }
